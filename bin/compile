@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# Usage:
+#
+#     $ bin/compile <build-dir> <cache-dir> <env-path>
+
+# Fail fast and fail hard.
+set -eo pipefail
+
+[ "$BUILDPACK_XTRACE" ] && set -o xtrace
+
+# Paths.
+BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
+ROOT_DIR=$(dirname $BIN_DIR)
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+
+source $BIN_DIR/utils
+
+PYTHON="$BUILD_DIR/.heroku/python/bin/python"
+PIP="$BUILD_DIR/.heroku/python/bin/pip"
+
+if [ ! -f "$PYTHON" ]; then
+    puts-warn "Python not found"
+    exit 1
+fi
+
+if [ ! -f "$PIP" ]; then
+    puts-warn "Pip not found"
+    exit 1
+fi
+
+# force reinstallation of any private dependencies
+if [ -d "$BUILD_DIR/wheelhouse" ]; then
+    for dep in "$BUILD_DIR"/wheelhouse/*.whl; do
+        name="$(basename "$dep")"
+        puts-step "Installing $name..."
+        "$PYTHON" "$PIP" install \
+            --force-reinstall \
+            --ignore-installed \
+            --upgrade \
+            --no-index \
+            --no-deps \
+            --disable-pip-version-check \
+            "$dep" | indent
+    done
+fi

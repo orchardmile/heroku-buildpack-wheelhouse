@@ -1,0 +1,14 @@
+# Buildpack Steps.
+puts-step() {
+  echo "-----> $@"
+}
+
+# Buildpack Warnings.
+puts-warn() {
+  echo " !     $@"
+}
+
+# Syntax sugar.
+indent() {
+  sed "s/^/       /"
+}
