@@ -20,6 +20,8 @@ source $BIN_DIR/utils
 
 PYTHON="$BUILD_DIR/.heroku/python/bin/python"
 PIP="$BUILD_DIR/.heroku/python/bin/pip"
+# default PYTHONHOME does not yet exist
+PYTHONHOME="$BUILD_DIR/.heroku/python"
 
 if [ ! -f "$PYTHON" ]; then
     puts-warn "Python not found"
@@ -37,6 +39,7 @@ if [ -d "$BUILD_DIR/wheelhouse" ]; then
         name="$(basename "$dep")"
         puts-step "Installing $name..."
         "$PYTHON" "$PIP" install \
+            --verbose \
             --force-reinstall \
             --ignore-installed \
             --upgrade \
